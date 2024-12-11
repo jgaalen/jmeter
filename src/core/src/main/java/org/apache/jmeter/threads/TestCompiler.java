@@ -115,21 +115,10 @@ public class TestCompiler implements HashTreeTraverser {
     }
 
     /**
-     * Reset pack to its initial state and clean up transaction results if needed
+     * Reset pack to its initial state
      * @param pack the {@link SamplePackage} to reset
      */
     public void done(SamplePackage pack) {
-        Sampler sampler = pack.getSampler();
-        if (sampler instanceof TransactionSampler) {
-            TransactionSampler transactionSampler = (TransactionSampler) sampler;
-            TransactionController controller = transactionSampler.getTransactionController();
-            if (transactionSampler.isTransactionDone()) {
-                // Create new sampler for next iteration
-                TransactionSampler newSampler = new TransactionSampler(controller, transactionSampler.getName());
-                SamplePackage newPack = transactionControllerConfigMap.get(controller);
-                newPack.setSampler(newSampler);
-            }
-        }
         pack.recoverRunningVersion();
     }
 

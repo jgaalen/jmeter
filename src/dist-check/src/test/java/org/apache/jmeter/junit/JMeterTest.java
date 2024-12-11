@@ -581,8 +581,7 @@ public class JMeterTest extends JMeterTestCase {
         return getObjects(Serializable.class)
                 .stream()
                 .map(Serializable.class::cast)
-                .filter(o -> !o.getClass().getName().endsWith("_Stub"))
-                .filter(o -> o.getClass().getName().startsWith("org.apache.jmeter."));
+                .filter(o -> !o.getClass().getName().endsWith("_Stub"));
     }
 
     /*
