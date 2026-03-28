@@ -83,3 +83,10 @@ else
 fi
 
 echo "Done. Run JMeter from ${ROOT}/bin/jmeter.sh or archive with ${ROOT}/create_jmeter_archive.sh"
+
+
+
+
+# AutoTune: post-build optimizations (strip unused JARs + generate CDS archive)
+[[ -x "$ROOT/strip_jmeter.sh" ]] && "$ROOT/strip_jmeter.sh"
+[[ -x "$ROOT/gen_cds.sh" ]] && "$ROOT/gen_cds.sh"
