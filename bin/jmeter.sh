@@ -116,7 +116,7 @@ JMETER_COMPLETE_ARGS=true
 AUTOTUNE_OPTS="-Xms32m -Xmx48m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:+DisableExplicitGC -XX:-UsePerfData"
 
 # Memory: cap metaspace, reduce thread stack, minimize reserved code cache
-AUTOTUNE_OPTS="$AUTOTUNE_OPTS -XX:MaxMetaspaceSize=24m -Xss256k -XX:ReservedCodeCacheSize=16m"
+AUTOTUNE_OPTS="$AUTOTUNE_OPTS -XX:MaxMetaspaceSize=32m -Xss256k -XX:ReservedCodeCacheSize=16m"
 
 # Log4j: log4j2.xml replaced with minimal CLI config (no GUI appender)
 
