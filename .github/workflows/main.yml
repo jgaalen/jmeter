@@ -31,10 +31,11 @@ jobs:
       # Number of jobs to generate in matrix.js
       MATRIX_JOBS: 4
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - id: set-matrix
         run: |
-          node .github/workflows/matrix.js
+          npm ci --prefix .github/workflows
+          node .github/workflows/matrix.mjs
 
   test:
     if: github.repository == 'apache/jmeter'
@@ -48,7 +49,7 @@ jobs:
       fail-fast: false
       # max-parallel: 4
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 50
     - name: Set up Java ${{ matrix.java_version }}, oracle
@@ -98,7 +99,7 @@ jobs:
     name: 'Error Prone (JDK 21)'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: 'Set up JDK 21'
       uses: actions/setup-java@v5
       with:

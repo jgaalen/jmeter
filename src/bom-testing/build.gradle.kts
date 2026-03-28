@@ -40,7 +40,7 @@ dependencies {
         // then it should be declared as "api" here since we use useCompileClasspathVersions
         // to make runtime classpath consistent with the compile one.
         api("org.wiremock:wiremock:3.13.1")
-        api("io.mockk:mockk:1.14.7")
+        api("io.mockk:mockk:1.14.9")
         api("net.bytebuddy:byte-buddy:1.17.8")
         api("nl.jqno.equalsverifier:equalsverifier:4.3")
         // activemq-all should not be used as it provides secondary slf4j binding
@@ -49,7 +49,7 @@ dependencies {
         api("org.apache.activemq:activemq-spring:6.2.0")
         api("org.apache.ftpserver:ftplet-api:1.2.1")
         api("org.apache.ftpserver:ftpserver-core:1.2.1")
-        api("org.apache.mina:mina-core:2.2.4")
+        api("org.apache.mina:mina-core:2.2.5")
         api("org.hamcrest:hamcrest-core:3.0")
         api("org.hamcrest:hamcrest-library:3.0")
         api("org.hamcrest:hamcrest:3.0")
