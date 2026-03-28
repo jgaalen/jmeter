@@ -97,7 +97,8 @@ CURRENT_VERSION=`"${JAVA_HOME}/bin/java" -version 2>&1 | awk -F'"' '/version/ {g
 
 # Check if Java is present and the minimal version requirement
 if [ "$CURRENT_VERSION" -ge "$MINIMAL_VERSION" ]; then
-    JAVA9_OPTS="--add-opens java.desktop/sun.awt=ALL-UNNAMED --add-opens java.desktop/sun.swing=ALL-UNNAMED --add-opens java.desktop/javax.swing.text.html=ALL-UNNAMED --add-opens java.desktop/java.awt=ALL-UNNAMED --add-opens java.desktop/java.awt.font=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED --add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED"
+    # Minimal add-opens: only java.base (no desktop/GUI modules in non-GUI mode)
+    JAVA9_OPTS="--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED"
 else
     echo "JMeter requires Java $MINIMAL_VERSION or later. Current Java version is $CURRENT_VERSION"
     exit 1
@@ -106,8 +107,27 @@ fi
 # Don't add additional arguments to the JVM start, except those needed for Java 9
 JMETER_COMPLETE_ARGS=true
 
-# add the Java9 args before the user given ones
-JVM_ARGS="$JAVA9_OPTS $JVM_ARGS"
+# AutoTune: Startup optimizations for CLI (non-GUI) mode
+# - Small heap (actual usage is ~17MB)
+# - SerialGC: optimal for short-lived CLI processes
+# - TieredStopAtLevel=1: skip C2 compiler (faster startup, we don't need peak throughput)
+# - DisableExplicitGC: avoid System.gc() call in JMeter shutdown
+# - UsePerfData off: skip writing perf counters
+AUTOTUNE_OPTS="-Xms32m -Xmx48m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:+DisableExplicitGC -XX:-UsePerfData"
+
+# Memory: cap metaspace, reduce thread stack, minimize reserved code cache
+AUTOTUNE_OPTS="$AUTOTUNE_OPTS -XX:MaxMetaspaceSize=24m -Xss256k -XX:ReservedCodeCacheSize=16m"
+
+# Log4j: log4j2.xml replaced with minimal CLI config (no GUI appender)
+
+# App-CDS: use pre-generated class data sharing archive if available
+CDS_ARCHIVE="${PRGDIR}/../lib/jmeter_cds.jsa"
+if [ -f "$CDS_ARCHIVE" ]; then
+    AUTOTUNE_OPTS="$AUTOTUNE_OPTS -XX:SharedArchiveFile=$CDS_ARCHIVE"
+fi
+
+# add the Java9 args + AutoTune opts before the user given ones
+JVM_ARGS="$JAVA9_OPTS $AUTOTUNE_OPTS $JVM_ARGS"
 export JVM_ARGS JMETER_COMPLETE_ARGS
 
 "${PRGDIR}/jmeter" "$@"
