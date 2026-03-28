@@ -26,13 +26,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
 
 import org.apache.jmeter.assertions.AssertionResult;
 import org.apache.jmeter.gui.Searchable;
@@ -140,14 +136,6 @@ public class SampleResult implements Serializable, Cloneable, Searchable {
             JMeterUtils.getPropDefault("sampleresult.nanoThreadSleep", 5000);  // $NON-NLS-1$
 
     private static final String NULL_FILENAME = "NULL";
-
-    // Reuse ByteArrayOutputStream instances to reduce memory allocations
-    private static final ThreadLocal<ByteArrayOutputStream> threadLocalBAOS =
-            ThreadLocal.withInitial(ByteArrayOutputStream::new);
-
-    // Reuse Inflater instances to minimize object creation
-    private static final ThreadLocal<Inflater> threadLocalInflater =
-            ThreadLocal.withInitial(() -> new Inflater(true));
 
     static {
         if (START_TIMESTAMP) {
@@ -291,11 +279,6 @@ public class SampleResult implements Serializable, Cloneable, Searchable {
      * Cache for responseData as string to avoid multiple computations
      */
     private transient volatile String responseDataAsString;
-
-    private static final String GZIP_ENCODING = "gzip";
-    private static final String X_GZIP_ENCODING = "x-gzip";
-    private static final String DEFLATE_ENCODING = "deflate";
-    private static final String BROTLI_ENCODING = "br";
 
     public SampleResult() {
         this(USE_NANO_TIME, NANOTHREAD_SLEEP);

@@ -20,10 +20,7 @@ plugins {
     id("org.gradle.kotlin.kotlin-dsl") // this is 'kotlin-dsl' without version
 }
 
-tasks.validatePlugins {
-    failOnWarning.set(true)
-    enableStricterValidation.set(true)
-}
+// validatePlugins lives on java-gradle-plugin, which is not applied to this precompiled script.
 
 // We need to figure out a version that is supported by the current JVM, and by the Kotlin Gradle plugin
 // So we settle on 21, 17, or 11 if the current JVM supports it
