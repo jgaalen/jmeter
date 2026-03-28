@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Prerequisites: run ./build_jmeter.sh to populate bin/ and lib/ from a Gradle build.
 # Script to create a compressed tar archive of bin and lib directories
 # Excludes bin/examples and bin/testfiles
 # Archives files under apache-jmeter/ directory
