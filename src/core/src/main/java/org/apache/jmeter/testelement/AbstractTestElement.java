@@ -169,10 +169,11 @@ public abstract class AbstractTestElement implements TestElement, Serializable, 
      */
     private transient boolean propertiesShared = false;
 
-    // Thread-specific variables saved here to save recalculation
-    private transient JMeterContext threadContext = null;
-
-    private transient String threadName = null;
+    // Per-VU thread name and context. Held in ThreadLocals rather than instance fields so that an
+    // element instance can be safely shared across virtual users (each VU reads/writes its own
+    // value). getThreadContext() falls back to JMeterContextService (itself a ThreadLocal).
+    private static final ThreadLocal<String> THREAD_NAME = new ThreadLocal<>();
+    private static final ThreadLocal<JMeterContext> THREAD_CONTEXT = new ThreadLocal<>();
 
     /**
      * Caches the no-arg constructor per element class. {@link Class#getDeclaredConstructor(Class...)}
@@ -1399,12 +1400,13 @@ public abstract class AbstractTestElement implements TestElement, Serializable, 
      */
     @Override
     public JMeterContext getThreadContext() {
-        if (threadContext == null) {
-            // Only samplers have the thread context set up by JMeterThread at
-            // present, so suppress the warning for now
-            threadContext = JMeterContextService.getContext();
+        // Per-VU via ThreadLocal so a shared element instance is safe across virtual users.
+        JMeterContext context = THREAD_CONTEXT.get();
+        if (context == null) {
+            context = JMeterContextService.getContext();
+            THREAD_CONTEXT.set(context);
         }
-        return threadContext;
+        return context;
     }
 
     /**
@@ -1413,12 +1415,8 @@ public abstract class AbstractTestElement implements TestElement, Serializable, 
      */
     @Override
     public void setThreadContext(JMeterContext inthreadContext) {
-        if (threadContext != null) {
-            if (inthreadContext != threadContext) {
-                throw new RuntimeException("Attempting to reset the thread context");
-            }
-        }
-        this.threadContext = inthreadContext;
+        // Per-VU via ThreadLocal so a shared element instance is safe across virtual users.
+        THREAD_CONTEXT.set(inthreadContext);
     }
 
     /**
@@ -1427,7 +1425,7 @@ public abstract class AbstractTestElement implements TestElement, Serializable, 
     @Override
     @SuppressWarnings("deprecation")
     public String getThreadName() {
-        return threadName;
+        return THREAD_NAME.get();
     }
 
     /**
@@ -1437,12 +1435,8 @@ public abstract class AbstractTestElement implements TestElement, Serializable, 
     @Override
     @SuppressWarnings("deprecation")
     public void setThreadName(String inthreadName) {
-        if (threadName != null) {
-            if (!threadName.equals(inthreadName)) {
-                throw new RuntimeException("Attempting to reset the thread name");
-            }
-        }
-        this.threadName = inthreadName;
+        // Per-VU via ThreadLocal so a shared element instance is safe across virtual users.
+        THREAD_NAME.set(inthreadName);
     }
 
     protected AbstractTestElement() {
