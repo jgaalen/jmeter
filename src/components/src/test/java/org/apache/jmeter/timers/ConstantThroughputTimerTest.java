@@ -28,6 +28,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.jmeter.testbeans.TestBeanMetadata;
+import org.apache.jmeter.testbeans.TestBeanHelper;
 
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.TestJMeterContextService;
@@ -53,7 +54,10 @@ class ConstantThroughputTimerTest {
                 futures.add(executor.submit(() -> {
                     ConstantThroughputTimer timer = new ConstantThroughputTimer();
                     timer.setThroughput(60.0);
+                    timer.setProperty("mode", "calcMode.2");
                     TestBeanMetadata.prewarm(timer);
+                    TestBeanHelper.prepare(timer);
+                    assertEquals(ConstantThroughputTimer.Mode.AllActiveThreads, timer.getMode());
                     assertEquals(60.0, timer.getThroughput());
                 }));
             }
