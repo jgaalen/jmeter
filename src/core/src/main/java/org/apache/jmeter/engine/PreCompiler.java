@@ -24,6 +24,7 @@ import org.apache.jmeter.engine.util.ValueReplacer;
 import org.apache.jmeter.functions.InvalidVariableException;
 import org.apache.jmeter.reporters.ResultCollector;
 import org.apache.jmeter.testelement.TestElement;
+import org.apache.jmeter.testbeans.TestBeanHelper;
 import org.apache.jmeter.testelement.TestPlan;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
@@ -84,6 +85,7 @@ public class PreCompiler implements HashTreeTraverser {
 
         } else {
             if(node instanceof TestElement testElement) {
+                TestBeanHelper.prewarm(testElement);
                 try {
                     replacer.replaceValues(testElement);
                 } catch (InvalidVariableException e) {

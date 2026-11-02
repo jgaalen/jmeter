@@ -21,6 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.jmeter.testbeans.TestBeanHelper;
 
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.TestJMeterContextService;
@@ -30,6 +37,34 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 class ConstantThroughputTimerTest {
+
+    @Test
+    void prewarmDoesNotEvaluatePropertiesAndSupportsConcurrentMetadataAccess() throws Exception {
+        ConstantThroughputTimer template = new ConstantThroughputTimer();
+        template.setProperty("throughput", "${rate}");
+        TestBeanHelper.prewarm(template);
+        assertEquals("${rate}", template.getPropertyAsString("throughput"));
+        Assumptions.assumeTrue(Runtime.version().feature() >= 21);
+        ExecutorService executor = (ExecutorService) Executors.class
+                .getMethod("newVirtualThreadPerTaskExecutor").invoke(null);
+        try {
+            var futures = new ArrayList<Future<?>>();
+            for (int i = 0; i < 1000; i++) {
+                futures.add(executor.submit(() -> {
+                    ConstantThroughputTimer timer = new ConstantThroughputTimer();
+                    timer.setThroughput(60.0);
+                    TestBeanHelper.prewarm(timer);
+                    assertEquals(60.0, timer.getThroughput());
+                }));
+            }
+            for (Future<?> future : futures) {
+                future.get(10, TimeUnit.SECONDS);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
 
     @Test
     void testTimer1() throws Exception {
