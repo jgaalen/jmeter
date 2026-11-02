@@ -119,15 +119,6 @@ public class TestBeanHelper {
         }
     };
 
-    /** Resolve reflective descriptors before virtual sampler threads start.
-     * Does not evaluate properties or mutate the test element.
-     */
-    public static void prewarm(TestElement element) {
-        if (element instanceof TestBean) {
-            GOOD_PROPS.get(element.getClass());
-        }
-    }
-
     /**
      * Prepare the bean for work by populating the bean's properties from the
      * property value map.

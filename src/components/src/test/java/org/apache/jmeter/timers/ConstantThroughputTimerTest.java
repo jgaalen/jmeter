@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.jmeter.testbeans.TestBeanHelper;
+import org.apache.jmeter.testbeans.TestBeanMetadata;
 
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.TestJMeterContextService;
@@ -42,7 +42,7 @@ class ConstantThroughputTimerTest {
     void prewarmDoesNotEvaluatePropertiesAndSupportsConcurrentMetadataAccess() throws Exception {
         ConstantThroughputTimer template = new ConstantThroughputTimer();
         template.setProperty("throughput", "${rate}");
-        TestBeanHelper.prewarm(template);
+        TestBeanMetadata.prewarm(template);
         assertEquals("${rate}", template.getPropertyAsString("throughput"));
         Assumptions.assumeTrue(Runtime.version().feature() >= 21);
         ExecutorService executor = (ExecutorService) Executors.class
@@ -53,7 +53,7 @@ class ConstantThroughputTimerTest {
                 futures.add(executor.submit(() -> {
                     ConstantThroughputTimer timer = new ConstantThroughputTimer();
                     timer.setThroughput(60.0);
-                    TestBeanHelper.prewarm(timer);
+                    TestBeanMetadata.prewarm(timer);
                     assertEquals(60.0, timer.getThroughput());
                 }));
             }
